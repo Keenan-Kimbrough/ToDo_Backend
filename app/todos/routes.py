@@ -5,6 +5,7 @@ from app.models import Todo
 from app.extensions import db
 from app import limiter
 from app.schema import TodoSchema
+from app.resourceSupport import syntatical_validation_of_to_do
 
 todo_schema = TodoSchema() # single objects schema
 todos_schema = Todoschema(many=True) # for lists
@@ -29,9 +30,9 @@ def add_todo():
         return jsonify({"message":"no input data provided"}),400
 
     # validate and deserialize input
+    isvalid = syntatical_validation_of_to_do(data)
 
-    errors = todo_schema.validate(data)
-    if errors:
+    if not isvalid:
         response = ({"message": "No input data provided"})
         return response, 422
 
