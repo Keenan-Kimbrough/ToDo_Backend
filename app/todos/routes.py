@@ -7,10 +7,13 @@ from app import limiter
 
 @todos_bp.route('/', methods=['GET'])
 @limiter.limit("10 per minute")
+@cache.cached(timeout=60)  # Cache this route for 60 seconds
 def get_todos():
     current_app.logger.info('Fetching all todos')
     todos = Todo.query.all()
-    return jsonify([todo.to_dict() for todo in todos])
+    response = jsonify([todo.to_dict() for todo in todos])
+    response.headers["Cache-Control"] = "public, max-age=3600"
+    return response
 
 @todos_bp.route('/', methods=['POST'])
 @limiter.limit("7 per minute")
@@ -20,15 +23,19 @@ def add_todo():
     todo = Todo(text=data['text'], completed=False)
     db.session.add(todo)
     db.session.commit()
-    return jsonify(todo.to_dict()), 201
+    response = jsonify(todo.to_dict())
+    return response, 201
 
 @todos_bp.route('/<int:todo_id>', methods=['DELETE'])
 @limiter.limit("10 per minute")
 def delete_todo(todo_id):
     current_app.logger.info('Deleteing  todos')
     todo = Todo.query.get(todo_id)
+    response = ''
     if todo:
         db.session.delete(todo)
         db.session.commit()
-        return '', 204
-    return jsonify({'error': 'Todo not found'}), 404
+        response = jsonify({'successfully deleted todo_id: ${todo_is}'})
+        return response, 204
+    response =jsonify({'error': 'Todo not found'})
+    return response, 404

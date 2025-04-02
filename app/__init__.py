@@ -7,11 +7,24 @@ from .todos.routes import todos_bp
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from app.errors import register_error_handlers
+from flask_caching import Cache
+
 
 
 def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
+
+
+    # Configure Flask-Caching to use Redis
+    app.config['CACHE_TYPE'] = 'RedisCache'
+    app.config['CACHE_REDIS_HOST'] = 'localhost'
+    app.config['CACHE_REDIS_PORT'] = 6379
+    app.config['CACHE_REDIS_DB'] = 0
+    app.config['CACHE_DEFAULT_TIMEOUT'] = 300  # Cache timeout in seconds
+
+    cache = Cache(app)
+
 
     # Initialize Flask-Limiter
     limiter = Limiter(
