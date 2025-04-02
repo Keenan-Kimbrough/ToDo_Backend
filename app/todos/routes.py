@@ -4,6 +4,10 @@ from . import todos_bp_v1
 from app.models import Todo
 from app.extensions import db
 from app import limiter
+from app.schema import TodoSchema
+
+todo_schema = TodoSchema() # single objects schema
+todos_schema = Todoschema(many=True) # for lists
 
 @todos_bp_v1.route('/', methods=['GET'])
 @limiter.limit("10 per minute")
@@ -19,11 +23,26 @@ def get_todos():
 @limiter.limit("7 per minute")
 def add_todo():
     current_app.logger.info('Creating todos')
+    response = ''
     data = request.get_json()
+    if not data:
+        return jsonify({"message":"no input data provided"}),400
+
+    # validate and deserialize input
+
+    errors = todo_schema.validate(data)
+    if errors:
+        response = ({"message": "No input data provided"})
+        return response, 422
+
+    data = todo_schema.load(data)
+   
     todo = Todo(text=data['text'], completed=False)
     db.session.add(todo)
     db.session.commit()
-    response = jsonify(todo.to_dict())
+
+    todo = todo_schema.dump(todo)
+    response = jsonify(todo)
     return response, 201
 
 @todos_bp_v1.route('/<int:todo_id>', methods=['DELETE'])
