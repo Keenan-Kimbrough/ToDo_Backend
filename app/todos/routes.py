@@ -1,11 +1,11 @@
 # app/todos/routes.py
 from flask import jsonify, request
-from . import todos_bp
+from . import todos_bp_v1
 from app.models import Todo
 from app.extensions import db
 from app import limiter
 
-@todos_bp.route('/', methods=['GET'])
+@todos_bp_v1.route('/', methods=['GET'])
 @limiter.limit("10 per minute")
 @cache.cached(timeout=60)  # Cache this route for 60 seconds
 def get_todos():
@@ -15,7 +15,7 @@ def get_todos():
     response.headers["Cache-Control"] = "public, max-age=3600"
     return response
 
-@todos_bp.route('/', methods=['POST'])
+@todos_bp_v1.route('/', methods=['POST'])
 @limiter.limit("7 per minute")
 def add_todo():
     current_app.logger.info('Creating todos')
@@ -26,7 +26,7 @@ def add_todo():
     response = jsonify(todo.to_dict())
     return response, 201
 
-@todos_bp.route('/<int:todo_id>', methods=['DELETE'])
+@todos_bp_v1.route('/<int:todo_id>', methods=['DELETE'])
 @limiter.limit("10 per minute")
 def delete_todo(todo_id):
     current_app.logger.info('Deleteing  todos')
