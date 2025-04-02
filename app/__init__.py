@@ -81,7 +81,7 @@ def create_app(config_class=Config):
 
     # Register blueprints
     app.register_blueprint(auth_bp, url_prefix='/auth')
-    app.register_blueprint(todos_bp, url_prefix='/todos')
+    app.register_blueprint(todos_bp_v1, url_prefix='/todos')
 
     # Create database tables if they don't exist
     with app.app_context():
