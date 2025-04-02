@@ -30,19 +30,14 @@ def add_todo():
         return jsonify({"message":"no input data provided"}),400
 
     # validate and deserialize input
-    isvalid = syntatical_validation_of_to_do(data)
+    isvalid_syntax = syntatical_validation_of_to_do(data)
 
-    if not isvalid:
+    if not isvalid_syntax:
         response = ({"message": "No input data provided"})
         return response, 422
 
-    data = todo_schema.load(data)
-   
-    todo = Todo(text=data['text'], completed=False)
-    db.session.add(todo)
-    db.session.commit()
-
-    todo = todo_schema.dump(todo)
+    todo = todo.TodoService().create_todo(data)
+    
     response = jsonify(todo)
     return response, 201
 
