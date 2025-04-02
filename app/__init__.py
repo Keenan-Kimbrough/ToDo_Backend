@@ -8,6 +8,10 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from app.errors import register_error_handlers
 from flask_caching import Cache
+from dotenv import load_dotenv
+
+#load environment variables
+load_dotenv
 
 
 
