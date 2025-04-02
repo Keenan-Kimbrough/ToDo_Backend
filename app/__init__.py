@@ -4,10 +4,22 @@ from .config import Config
 from .extensions import db, cors
 from .auth.routes import auth_bp
 from .todos.routes import todos_bp
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+from app.errors import register_error_handlers
+
 
 def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
+
+    # Initialize Flask-Limiter
+    limiter = Limiter(
+        app,
+        key_func=get_remote_address,  # This function is used to identify clients (by IP)
+        default_limits=["200 per day", "50 per hour"]
+    )
+    
         # Configure logging: log to both console and a file.
     logging.config.dictConfig({
         'version': 1,
@@ -62,4 +74,5 @@ def create_app(config_class=Config):
     with app.app_context():
         db.create_all()
 
+    register_error_handlers(app)
     return app
